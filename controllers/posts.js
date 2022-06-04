@@ -23,21 +23,20 @@ const posts = {
 
 	async getPost(req, res, next) {
 		const id = req.params.id;
-		let post ;
+		let post;
 		if (ObjectId.isValid(id)) {
 			// post = await Post.findById(id)
 			post = await Post.findById(id).populate({
 				path: "user",
 				select: "name photo ",
-			})
+			});
 			if (post) {
 				res.status(200).json({
 					post,
 				});
-			}else {
+			} else {
 				return appError(400, "無此貼文ID", next);
 			}
-
 		} else {
 			return appError(400, "貼文id格式錯誤，請重新輸入", next);
 		}
@@ -45,8 +44,18 @@ const posts = {
 
 	async postPost(req, res, next) {
 		// const data = req.body;
+		// const { user, content, image } = req.body;
+		let userInfo;
 		const { user, content, image } = req.body;
-		if (user && content) {
+		if (ObjectId.isValid(user)) {
+			userInfo = await User.findById(user);
+		} else {
+			return appError(400, "user id格式錯誤，請重新輸入", next);
+		}
+		if (!userInfo) {
+			return appError(400, "無此user id，請重新輸入", next);
+		}
+		if (content) {
 			const newPost = await Post.create({
 				user: user,
 				content: content,
@@ -55,7 +64,7 @@ const posts = {
 			resWriteData(res, newPost);
 		} else {
 			// errorHandle(req, res, 40001);
-			return appError(400, "沒填寫 user 、 content 資料，或欄位名稱不正確", next);
+			return appError(400, "沒填寫 content 資料，或欄位名稱不正確", next);
 		}
 	},
 
@@ -66,7 +75,7 @@ const posts = {
 
 	async delPost(req, res, next) {
 		const id = req.params.id;
-		let post ;
+		let post;
 		if (ObjectId.isValid(id)) {
 			post = await Post.findById(id);
 		} else {
@@ -84,12 +93,11 @@ const posts = {
 		} else {
 			return appError(400, "無此貼文ID", next);
 		}
-
 	},
 
 	async patchPost(req, res, next) {
 		const id = req.params.id;
-		let post ;
+		let post;
 		const { user, content, image } = req.body;
 		if (ObjectId.isValid(id)) {
 			post = await Post.findById(id);
