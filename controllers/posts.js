@@ -43,8 +43,6 @@ const posts = {
 	},
 
 	async postPost(req, res, next) {
-		// const data = req.body;
-		// const { user, content, image } = req.body;
 		let userInfo;
 		const { user, content, image } = req.body;
 		if (ObjectId.isValid(user)) {
